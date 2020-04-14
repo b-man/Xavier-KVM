@@ -1,0 +1,32 @@
+From 54d72e2f79593fe850ef8fddbfb46f78b294e833 Mon Sep 17 00:00:00 2001
+From: Brian McKenzie <mckenzba@gmail.com>
+Date: Mon, 13 Apr 2020 21:44:41 -0400
+Subject: [PATCH] Enable KVM support for t194
+
+This patch enables KVM support for the Nvidia t194 SoC.
+The t194 implements a vGIC (GICv2 GIC-400) intrrupt controller
+with support for interrupt virtualizartion. The Carmel cores used
+in this SoC fully support ARMv8.1 and ARMv8.2 virtualization extensions.
+---
+ .../soc/t19x/kernel-dts/tegra194-soc/tegra194-soc-base.dtsi  | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/nvidia/soc/t19x/kernel-dts/tegra194-soc/tegra194-soc-base.dtsi b/nvidia/soc/t19x/kernel-dts/tegra194-soc/tegra194-soc-base.dtsi
+index a896ba5..3386253 100644
+--- a/nvidia/soc/t19x/kernel-dts/tegra194-soc/tegra194-soc-base.dtsi
++++ b/nvidia/soc/t19x/kernel-dts/tegra194-soc/tegra194-soc-base.dtsi
+@@ -691,7 +691,10 @@
+ 		#interrupt-cells = <3>;
+ 		interrupt-controller;
+ 		reg = <0x0 0x03881000 0x0 0x00001000
+-		       0x0 0x03882000 0x0 0x00002000>;
++		       0x0 0x03882000 0x0 0x00002000
++		       0x0 0x03884000 0x0 0x00002000
++		       0x0 0x03886000 0x0 0x00002000>;
++		interrupts = <0x1 0x9 0xff04>;
+ 		status = "disabled";
+ 	};
+ 
+-- 
+2.17.1
+
