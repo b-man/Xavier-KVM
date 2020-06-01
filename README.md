@@ -6,9 +6,6 @@ The Carmel cores of the Xavier T194 provides full support for virtualization wit
 
 ##### Requirements:
 - An Nvidia Jetson AGX Xavier
-- A Workstation with  Nvidia JetPack 4.3 installed
-
-
 
 ##### On your Xavier:
 ```
@@ -28,10 +25,12 @@ git clone https://github.com/b-man/Xavier-KVM.git ~/Xavier-KVM
 
 # Patch the device tree
 cd hardware/
-patch -Np1 -i ~/Xavier-KVM/0001-Enable-KVM-support-for-t194.patch
+patch -Np1 -i ~/Xavier-KVM/patches/hardware/0001-Enable-KVM-support-for-t194.patch
 
 # Copy the kernel config to the kernel source tree
 cd ../kernel/kernel-4.9
+patch -Np1 -i ~/Xavier-KVM/patches/kernel/*.patch
+
 cp ~/Xavier-KVM/config-4.9.140-tegra-virt .config
 
 # Build kernel components
@@ -45,34 +44,17 @@ sudo make ARCH=arm64 modules_install -j8
 # Copy kernel and device tree to PC with the Nvidia JetPack installed
 scp arch/arm64/boot/Image remotehost:~/
 scp arch/arm64/boot/dts/tegra194-p2888-0001-p2822-0000.dtb remotehost:~/
+
+# Install the kernel
+# On AGX Xavier, cboot accepts unsigned kernels when Secure Boot is off, which is the default.
+
+sudo rm /boot/Image.sig
+sudo rm /boot/tegra194-p2888-0001-p2822-0000.dtb 
+
+sudo install -m 0644  arch/arm64/boot/Image /boot/
+sudo install -m 0644 arch/arm64/boot/dts/tegra194-p2888-0001-p2822-0000.dtb /boot/dtb/
 ```
 
-##### On your workstation:
-```
-# Make a backup copy of the vanilla kernel folder
-cd ~/nvidia/nvidia_sdk/JetPack_4.3_Linux_P2888/Linux_for_Tegra/
-cp -ap kernel{,.orig}
-
-# Replace the kernel and device tree
-rm -f kernel/Image
-rm -f kernel/dtb/tegra194-p2888-0001-p2822-0000.dtb
-cp -ap ~/Image kernel/
-cp -ap ~/tegra194-p2888-0001-p2822-0000.dtb kernel/dtb/
-
-# Sign the kernel and device tree
-sudo ./flash.sh --no-flash -k kernel jetson-xavier mmcblk0p1
-sudo ./flash.sh --no-flash -k kernel-dtb jetson-xavier mmcblk0p1
-
-# Copy the kernel and device tree back to your Xavier
-scp rootfs/boot/Image{,.sig} xavier:~/
-scp bootloader/tegra194-p2888-0001-p2822-0000.dtb{,.sig} xavier:~/
-```
-##### On your Xavier:
-```
-# Install the signed kernel and device tree
-sudo install -m 0644 ~/Image{,.sig} /boot/
-sudo install -m 0644 ~/tegra194-p2888-0001-p2822-0000.dtb{,.sig} /boot/dtb/
-```
 Reboot your Jetson AGX Xavier. After rebooting you can verify that virtualization is enabled
 by running the following commands:
 
