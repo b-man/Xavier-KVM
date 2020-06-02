@@ -1,0 +1,43 @@
+From 5ba9a17dcfb28ce57beb3fff2dc8abf76f1873f7 Mon Sep 17 00:00:00 2001
+From: Mathieu Malaterre <malat@debian.org>
+Date: Thu, 24 Jan 2019 19:06:24 +0100
+Subject: [PATCH 7/7] regmap: Remove attribute packed from struct
+ 'regcache_rbtree_node'
+
+On one hand commit 28644c809f44 ("regmap: Add the rbtree cache support")
+added 'regcache_rbtree_node' as packed structure, while on the other hand
+commit e977145aeaad ("[RBTREE] Add explicit alignment to sizeof(long)
+for struct rb_node.") declared struct 'rb_node' as aligned.
+
+Solve the ambiguity of placing aligned structure in a packed one by
+removing the packed attribute from struct. This seems to be the behavior
+of gcc anyway.
+
+This removes the following warning (W=1):
+
+  drivers/base/regmap/regcache-rbtree.c:36:1: warning: alignment 1 of 'struct regcache_rbtree_node' is less than 4 [-Wpacked-not-aligned]
+
+Cc: Dimitris Papastamos <dp@opensource.wolfsonmicro.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Signed-off-by: Mathieu Malaterre <malat@debian.org>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ drivers/base/regmap/regcache-rbtree.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/base/regmap/regcache-rbtree.c b/drivers/base/regmap/regcache-rbtree.c
+index b11af3f2c1db..9d2715be7654 100644
+--- a/drivers/base/regmap/regcache-rbtree.c
++++ b/drivers/base/regmap/regcache-rbtree.c
+@@ -33,7 +33,7 @@ struct regcache_rbtree_node {
+ 	unsigned int blklen;
+ 	/* the actual rbtree node holding this block */
+ 	struct rb_node node;
+-} __attribute__ ((packed));
++};
+ 
+ struct regcache_rbtree_ctx {
+ 	struct rb_root root;
+-- 
+2.17.1
+
