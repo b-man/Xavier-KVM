@@ -27,10 +27,11 @@ git clone https://github.com/b-man/Xavier-KVM.git ~/Xavier-KVM
 cd hardware/
 patch -Np1 -i ~/Xavier-KVM/patches/hardware/0001-Enable-KVM-support-for-t194.patch
 
-# Copy the kernel config to the kernel source tree
-cd ../kernel/kernel-4.9
+# Patch the kernel
 patch -Np1 -i ~/Xavier-KVM/patches/kernel/*.patch
 
+# Copy the kernel config to the kernel source tree
+cd ../kernel/kernel-4.9
 cp ~/Xavier-KVM/config-4.9.140-tegra-virt .config
 
 # Build kernel components
@@ -40,10 +41,6 @@ make ARCH=arm64 modules -j8
 
 # Install kernel modules and firmware
 sudo make ARCH=arm64 modules_install -j8
-
-# Copy kernel and device tree to PC with the Nvidia JetPack installed
-scp arch/arm64/boot/Image remotehost:~/
-scp arch/arm64/boot/dts/tegra194-p2888-0001-p2822-0000.dtb remotehost:~/
 
 # Install the kernel
 # On AGX Xavier, cboot accepts unsigned kernels when Secure Boot is off, which is the default.
