@@ -20,7 +20,8 @@ tar -jxpf public_sources.tbz2
 cd Linux_for_Tegra/source/public
 tar -jxpf kernel_src.tbz2
 
-# Download patch and kernel config
+# Download patch and kernel config.
+# If no branch is specified, then the latest L4T release is used.
 git clone https://github.com/b-man/Xavier-KVM.git ~/Xavier-KVM
 
 # Patch the device tree
@@ -28,10 +29,10 @@ cd hardware/
 patch -Np1 -i ~/Xavier-KVM/patches/hardware/0001-Enable-KVM-support-for-t194.patch
 
 # Patch the kernel
-patch -Np1 -i ~/Xavier-KVM/patches/kernel/*.patch
+cd ../kernel/kernel-4.9
+for i in ~/Xavier-KVM/patches/kernel/*; do patch -Np1 -i $i; done
 
 # Copy the kernel config to the kernel source tree
-cd ../kernel/kernel-4.9
 cp ~/Xavier-KVM/config-4.9.140-tegra-virt .config
 
 # Build kernel components
